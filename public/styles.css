@@ -1,0 +1,8 @@
+body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 16px; }
+.form input { display:block; margin:8px 0; padding:8px; width:100%; max-width:400px;}
+.form button { padding:8px 12px; }
+.errors { background:#ffe6e6; border:1px solid #ffcccc; padding:8px; margin-bottom:12px; }
+.tasks { list-style:none; padding:0; }
+.tasks li { margin:8px 0; }
+.form-inline { display:flex; gap:8px; margin-bottom:12px; }
+.form-inline input { flex:1; }

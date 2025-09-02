@@ -1,0 +1,76 @@
+taskproject/
+├── composer.json
+├── .gitignore
+├── README.md
+├── seed.php
+├── sql/
+│   └── create_tables.sql
+├── config/
+│   └── config.php
+├── seeders/
+│   └── AdminSeeder.php
+├── src/
+│   ├── Database/
+│   │   └── Database.php
+│   ├── Models/
+│   │   ├── User.php
+│   │   └── Task.php
+│   ├── Requests/
+│   │   ├── LoginRequest.php
+│   │   └── RegisterRequest.php
+│   ├── Services/
+│   │   ├── AuthService.php
+│   │   └── TaskService.php
+│   ├── Controllers/
+│   │   ├── AuthController.php
+│   │   └── TaskController.php
+│   └── Views/
+│       ├── login.php
+│       ├── register.php
+│       ├── dashboard.php
+│       └── tasks_list.php
+│
+├── lang/
+│   ├── en.php
+│   └── ar.php
+└── public/
+    ├── index.php        # Router / entry
+    ├── login.php
+    ├── loginadmin.php
+    ├── register.php
+    ├── dashboard.php
+    ├── admin.php
+    ├── logout.php
+    ├── add_task.php
+    ├── delete_task.php
+    ├── toggle_task.php
+    ├── styles.css
+    └── assets/
+
+
+UIkit:
+UIkit هو إطار عمل (Framework) متكامل لبناء واجهات المستخدم (UI) باستخدام HTML, CSS, وJavaScript.
+
+يهدف لتوفير أدوات ومكونات جاهزة لتطوير مواقع وتطبيقات ويب بشكل سريع، مع تصميم نظيف وأنيق.
+
+يشتهر بسهولة الاستخدام والتنظيم مع مرونة عالية في التخصيص.
+
+يدعم الـ Responsive Design بشكل ممتاز، يعني المواقع تتكيف مع كل الأجهزة (موبايل، تابلت، ديسكتوب).
+
+------------------------
+
+أهم مميزاته:
+مكتبة مكونات كبيرة: أزرار، نوافذ منبثقة (modals)، تنقل (navbars)، أكورديون (accordion)، جداول، بطاقات (cards)، وأكتر.
+
+تصميم بسيط وأنيق: ألوان ومحاذاة متناغمة تعطي مظهر احترافي بدون تعقيد.
+
+سهل الدمج: تضيف ملف CSS و JS فقط في مشروعك، وتبدأ تستخدم مكونات UIkit مباشرة.
+
+مرونة وتخصيص: تقدر تعدل الألوان، الخطوط، والأبعاد بسهولة.
+
+وثائق ممتازة: فيها شرح لكل مكون وأمثلة تفاعلية.
+
+------------------------------
+Dashboard Same Filment php But The Framework Are Use UIkit
+--------------
+--- Khder Gaber Ahmed - ITE - Back-End Devlpor -- 8/8/2025 ....... 

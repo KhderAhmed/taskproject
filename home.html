@@ -1,0 +1,473 @@
+<?php
+use App\Services\DBLangService; ?>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>لوحة الإدارة - Admin Panel </title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/uikit@3.18.0/dist/css/uikit.min.css"
+      rel="stylesheet" />
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Cairo', sans-serif;
+      background-color: #121212;
+      color: #eee;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: #1e1e1e;
+      width: 75px;
+      transition: width 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      padding-top: 2rem;
+      box-shadow: 3px 0 12px rgba(214, 64, 130, 0.7);
+      user-select: none;
+      position: relative;
+      z-index: 1000;
+    }
+    .sidebar:hover {
+      width: 230px;
+      box-shadow: 4px 0 20px rgba(214, 64, 130, 0.9);
+    }
+.sidebar .logo {
+  font-size: 1.9rem;
+  font-weight: 900;
+  text-align: center;
+  padding: 1.5rem 0;
+  color: #f472b6;
+  letter-spacing: 0.15em;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: max-width 0.3s ease, opacity 0.3s ease;
+  max-width: 0;          /* تختفي عند السايدبار الضيق */
+  opacity: 0;
+  margin: 0 auto;
+}
+
+.sidebar:hover .logo {
+  max-width: 160px;      /* مساحة كافية لعرض الكلمة */
+  opacity: 1;
+}
+
+    nav {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      margin-top: 1.5rem;
+    }
+
+    nav a {
+      display: flex;
+      align-items: center;
+      color: #ccc;
+      padding: 1.1rem 1.8rem 1.1rem 1.2rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-decoration: none;
+      white-space: nowrap;
+      border-radius: 8px;
+      margin: 0.35rem 0;
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      user-select: none;
+    }
+
+    nav a svg {
+      width: 28px;
+      height: 28px;
+      stroke: #f472b6;
+      margin-left: 1.3rem;
+      flex-shrink: 0;
+      transition: stroke 0.3s ease;
+    }
+
+    /* Hide text on collapsed sidebar */
+    .sidebar:not(:hover) nav a span {
+      display: none;
+    }
+
+    nav a:hover,
+    nav a.active {
+      background: #d64082;
+      color: white;
+      box-shadow: 0 0 12px #d64082cc;
+    }
+    nav a:hover svg,
+    nav a.active svg {
+      stroke: white;
+    }
+
+    /* Main Content */
+    main {
+      flex: 1;
+      background: #181818;
+      margin: 1.5rem;
+      border-radius: 12px;
+      padding: 3rem 3.5rem;
+      box-shadow: 0 0 24px rgba(214, 64, 130, 0.4);
+      overflow-y: auto;
+    }
+
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 60px;
+      background: #1e1e1e;
+      display: flex;
+      align-items: center;
+      padding: 0 2rem;
+      color: #f472b6;
+      font-weight: 900;
+      font-size: 1.4rem;
+      box-shadow: 0 2px 10px rgba(214, 64, 130, 0.5);
+      z-index: 1100;
+      user-select: none;
+      justify-content: space-between;
+    }
+
+    /* User dropdown */
+    .user-menu {
+      position: relative;
+      user-select: none;
+    }
+    .user-btn {
+      background: none;
+      border: none;
+      color: #f472b6;
+      font-weight: 900;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0.3rem 0.5rem;
+      border-radius: 6px;
+      transition: background-color 0.3s ease;
+    }
+    .user-btn:hover, .user-btn[aria-expanded="true"] {
+      background-color: #d64082;
+      color: #fff;
+    }
+    .user-btn svg {
+      stroke-width: 3;
+      transition: transform 0.3s ease;
+      width: 18px;
+      height: 18px;
+    }
+    .user-btn[aria-expanded="true"] svg {
+      transform: rotate(180deg);
+    }
+    .dropdown {
+      position: absolute;
+      right: 0;
+      top: 110%;
+      background: #2c2c2c;
+      border-radius: 8px;
+      box-shadow: 0 4px 14px rgba(214, 64, 130, 0.8);
+      padding: 0.5rem 0;
+      min-width: 140px;
+      display: none;
+      list-style: none;
+      z-index: 1200;
+    }
+    .dropdown.show {
+      display: block;
+    }
+    .dropdown li {
+      padding: 0;
+    }
+    .dropdown li a {
+      color: #eee;
+      display: block;
+      padding: 0.55rem 1.2rem;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      border-radius: 4px;
+    }
+    .dropdown li a:hover {
+      background-color: #f472b6;
+      color: #fff;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 14px;
+      margin-top: 2rem;
+      color: #eee;
+      font-size: 1.05rem;
+      font-weight: 600;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 18px rgba(214, 64, 130, 0.25);
+    }
+
+    thead tr th {
+      background: #2a2a2a;
+      padding: 1.2rem 1.5rem;
+      text-align: right;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      user-select: none;
+      border-right: 1px solid #3a3a3a;
+    }
+    thead tr th:last-child {
+      border-right: none;
+    }
+
+    tbody tr {
+      background: #1e1e1e;
+      border-radius: 12px;
+      box-shadow: 0 1px 8px rgba(214, 64, 130, 0.18);
+      transition: background-color 0.3s ease;
+      cursor: default;
+    }
+    tbody tr:hover {
+      background: #d64082;
+      color: white;
+      box-shadow: 0 4px 18px #d64082cc;
+    }
+
+    tbody tr td {
+      padding: 1.1rem 1.6rem;
+      text-align: right;
+      border-right: 1px solid #333;
+      vertical-align: middle;
+      user-select: none;
+    }
+    tbody tr td:last-child {
+      border-right: none;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: #f472b6;
+      border: none;
+      padding: 0.55rem 1.3rem;
+      margin: 0 0.4rem;
+      color: white;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 2px 14px #f472b6cc;
+      font-size: 1rem;
+      user-select: none;
+    }
+    .btn-primary:hover {
+      background: #d64082;
+      box-shadow: 0 5px 20px #d64082cc;
+    }
+
+    .btn-danger {
+      background: #e53935;
+      border: none;
+      padding: 0.55rem 1.3rem;
+      margin: 0 0.4rem;
+      color: white;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 2px 14px #e5393599;
+      font-size: 1rem;
+      user-select: none;
+    }
+    .btn-danger:hover {
+      background: #b71c1c;
+      box-shadow: 0 5px 20px #b71c1ccc;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      body {
+        flex-direction: column;
+        overflow: auto;
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        height: calc(100% - 60px);
+        width: 230px !important;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        box-shadow: 2px 0 20px rgba(214, 64, 130, 0.9);
+        z-index: 1200;
+      }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      main {
+        margin: 1rem 1rem 1rem 1rem;
+        border-radius: 12px;
+        padding: 2rem;
+      }
+
+      header {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 60px;
+        z-index: 1300;
+      }
+    }
+  </style>
+  </head>
+  <body>
+<header>
+  <div><?= DBLangService::get('tasks') ?></div>
+
+<div class="user-menu" style="width: max-content;">
+  <select
+    class="user-select"
+    onchange="window.location.href=this.value"
+    aria-label="قائمة المستخدم"
+    style="
+      font-weight: 900;
+      border: 2px solid #f472b6;
+      color: #f472b6;
+      background-color: #2c2c2c;
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      min-width: 140px;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url('data:image/svg+xml;utf8,<svg fill=\'none\' stroke=\'%23f472b6\' stroke-width=\'2\' viewBox=\'0 0 24 24\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M6 9l6 6 6-6\'/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 16px 16px;
+    "
+  >
+    <option value="#" selected><?= htmlspecialchars($_SESSION['name'] ?? 'ادمن') ?></option>
+    <option value="/profile">الملف الشخصي</option>
+    <option value="/logoutadmin">تسجيل خروج</option>
+  </select>
+</div>
+
+
+
+  <div class="language-switcher">
+    <select
+      class="user-select"
+      onchange="window.location.href=this.value"
+      aria-label="تبديل اللغة"
+      style="font-weight: 900; border-color: #f472b6; color: #f472b6;"
+    >
+      <option value="/change_lang.php?lang=ar" <?= DBLangService::currentLocale() === 'ar' ? 'selected' : '' ?>>العربية</option>
+      <option value="/change_lang.php?lang=en" <?= DBLangService::currentLocale() === 'en' ? 'selected' : '' ?>>English</option>
+    </select>
+  </div>
+</header>
+
+<style>
+  
+  .language-switcher select {
+    background-color: transparent;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 0.3rem 0.5rem;
+    user-select: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .language-switcher select:hover,
+  .language-switcher select:focus {
+    background-color: #d64082;
+    color: white;
+    border-color: #d64082;
+    outline: none;
+  }
+</style>
+
+    <aside class="sidebar" id="sidebar">
+      <div class="logo"> <?= htmlspecialchars($_SESSION['name'] ?? '') ?></div>
+      <nav>
+        <a href="#" class="active">
+          <span>الرئيسية</span>
+          <svg fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24"><path
+              d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6"></path></svg>
+        </a>
+        <a href="#">
+          <span>المهام</span>
+          <svg fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle></svg>
+        </a>
+        <a href="/users">
+          <span>المستخدمون</span>
+          <svg fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24"><path
+              d="M17 21v-2a4 4 0 00-8 0v2"></path><circle cx="12" cy="7"
+              r="4"></circle></svg>
+        </a>
+        <a href="#">
+          <span>الإعدادات</span>
+          <svg fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path
+              d="M19.4 15a7.96 7.96 0 01-14.8 0"></path></svg>
+        </a>
+      </nav>
+    </aside>
+
+    <main>
+      <h1>مرحبا بك في لوحة الإدارة</h1>
+      <p>هذه هي الصفحة الرئيسية الخاصة بلوحة التحكم. يمكنك إدارة المهام،
+        المستخدمين، والإعدادات من هنا.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>المهمة</th>
+            <th>الحالة</th>
+            <th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>إنشاء صفحة تسجيل دخول</td>
+            <td>مكتملة</td>
+            <td>
+              <button class="btn-primary">تعديل</button>
+              <button class="btn-danger">حذف</button>
+            </td>
+          </tr>
+          <tr>
+            <td>تطوير لوحة التحكم</td>
+            <td>قيد التنفيذ</td>
+            <td>
+              <button class="btn-primary">تعديل</button>
+              <button class="btn-danger">حذف</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/uikit@3.18.0/dist/js/uikit.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/uikit@3.18.0/dist/js/uikit-icons.min.js"></script>
+ 
+  </body>
+</html>
